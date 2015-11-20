@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application name="Symbols_Counter">
+
+    <ProgramModel>
+        <program name="Map" javaclass="eu.juniper.program.Map"/>
+        <program name="Reduce" javaclass="eu.juniper.program.Reduce"/>
+    </ProgramModel>
+
+    <GroupModel>
+        <mpigroup name="Maps">
+            <member mpiglobalrank="0" programName="Map"/>
+            <member mpiglobalrank="1" programName="Map"/>
+        </mpigroup>
+        <mpigroup name="LocalReduces">
+            <member mpiglobalrank="2" programName="Reduce"/>
+            <member mpiglobalrank="3" programName="Reduce"/>
+        </mpigroup>
+        <mpigroup name="GlobalReduces">
+            <member mpiglobalrank="4" programName="Reduce"/>
+        </mpigroup>
+    </GroupModel>
+
+    <CommunicationModel>
+            <dataconnection name="connection1" sendingGroup="Maps" receiverMpiGroup="LocalReduces" type="symmetric"/>
+            <dataconnection name="connection2" sendingGroup="LocalReduces" receiverMpiGroup="GlobalReduces" type="alltoone"/>
+    </CommunicationModel>
+
+    <DeploymentModel>
+        <cloudnode mpiglobalrank="0" hostipaddr="127.0.0.1"/>
+        <cloudnode mpiglobalrank="1" hostipaddr="127.0.0.1"/>
+        <cloudnode mpiglobalrank="2" hostipaddr="127.0.0.1"/>
+        <cloudnode mpiglobalrank="3" hostipaddr="127.0.0.1"/>
+        <cloudnode mpiglobalrank="4" hostipaddr="127.0.0.1"/>
+    </DeploymentModel>
+
+</application>

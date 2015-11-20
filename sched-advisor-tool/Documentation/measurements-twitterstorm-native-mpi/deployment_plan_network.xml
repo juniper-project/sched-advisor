@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<application name="BUT_Streams">
+  <ProgramModel>
+    <program javaclass="cz.vutbr.fit.twitterstorm.spouts.DumpSpout" name="Dump"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.FilterBolt" name="Filter"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.GenderBolt" name="Gender"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.IndexBolt" name="Index"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.LemmaBolt" name="Lemma"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.NERBolt" name="Ner"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.ParseBolt" name="Parse"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.POSBolt" name="PartOfSpeech"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.SentenceSplitterBolt" name="Segment"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.SentimentBolt" name="Sentiment"/>
+    <program javaclass="cz.vutbr.fit.twitterstorm.bolts.TokenizeBolt" name="Tokenize"/>
+  </ProgramModel>
+  <GroupModel>
+    <mpigroup name="group_node_Dump">
+      <member mpiglobalrank="0" mpilocalrank="0" programName="Dump"/>
+      <member mpiglobalrank="1" mpilocalrank="1" programName="Dump"/>
+      <member mpiglobalrank="2" mpilocalrank="2" programName="Dump"/>
+      <member mpiglobalrank="3" mpilocalrank="3" programName="Dump"/>
+    </mpigroup>
+    <mpigroup name="group_node_Filter">
+      <member mpiglobalrank="4" mpilocalrank="0" programName="Filter"/>
+      <member mpiglobalrank="5" mpilocalrank="1" programName="Filter"/>
+      <member mpiglobalrank="6" mpilocalrank="2" programName="Filter"/>
+      <member mpiglobalrank="7" mpilocalrank="3" programName="Filter"/>
+    </mpigroup>
+    <mpigroup name="group_node_Tokenize">
+      <member mpiglobalrank="8" mpilocalrank="0" programName="Tokenize"/>
+      <member mpiglobalrank="9" mpilocalrank="1" programName="Tokenize"/>
+      <member mpiglobalrank="10" mpilocalrank="2" programName="Tokenize"/>
+      <member mpiglobalrank="11" mpilocalrank="3" programName="Tokenize"/>
+    </mpigroup>
+    <mpigroup name="group_node_Segment">
+      <member mpiglobalrank="12" mpilocalrank="0" programName="Segment"/>
+      <member mpiglobalrank="13" mpilocalrank="1" programName="Segment"/>
+      <member mpiglobalrank="14" mpilocalrank="2" programName="Segment"/>
+      <member mpiglobalrank="15" mpilocalrank="3" programName="Segment"/>
+    </mpigroup>
+    <mpigroup name="group_node_PartOfSpeech">
+      <member mpiglobalrank="16" mpilocalrank="0" programName="PartOfSpeech"/>
+      <member mpiglobalrank="17" mpilocalrank="1" programName="PartOfSpeech"/>
+      <member mpiglobalrank="18" mpilocalrank="2" programName="PartOfSpeech"/>
+      <member mpiglobalrank="19" mpilocalrank="3" programName="PartOfSpeech"/>
+    </mpigroup>
+    <mpigroup name="group_node_Gender">
+      <member mpiglobalrank="20" mpilocalrank="0" programName="Gender"/>
+      <member mpiglobalrank="21" mpilocalrank="1" programName="Gender"/>
+      <member mpiglobalrank="22" mpilocalrank="2" programName="Gender"/>
+      <member mpiglobalrank="23" mpilocalrank="3" programName="Gender"/>
+    </mpigroup>
+    <mpigroup name="group_node_Lemma">
+      <member mpiglobalrank="24" mpilocalrank="0" programName="Lemma"/>
+      <member mpiglobalrank="25" mpilocalrank="1" programName="Lemma"/>
+      <member mpiglobalrank="26" mpilocalrank="2" programName="Lemma"/>
+      <member mpiglobalrank="27" mpilocalrank="3" programName="Lemma"/>
+    </mpigroup>
+    <mpigroup name="group_node_Ner">
+      <member mpiglobalrank="28" mpilocalrank="0" programName="Ner"/>
+      <member mpiglobalrank="29" mpilocalrank="1" programName="Ner"/>
+      <member mpiglobalrank="30" mpilocalrank="2" programName="Ner"/>
+      <member mpiglobalrank="31" mpilocalrank="3" programName="Ner"/>
+    </mpigroup>
+    <mpigroup name="group_node_Parse">
+      <member mpiglobalrank="32" mpilocalrank="0" programName="Parse"/>
+      <member mpiglobalrank="33" mpilocalrank="1" programName="Parse"/>
+      <member mpiglobalrank="34" mpilocalrank="2" programName="Parse"/>
+      <member mpiglobalrank="35" mpilocalrank="3" programName="Parse"/>
+    </mpigroup>
+    <mpigroup name="group_node_Sentiment">
+      <member mpiglobalrank="36" mpilocalrank="0" programName="Sentiment"/>
+      <member mpiglobalrank="37" mpilocalrank="1" programName="Sentiment"/>
+      <member mpiglobalrank="38" mpilocalrank="2" programName="Sentiment"/>
+      <member mpiglobalrank="39" mpilocalrank="3" programName="Sentiment"/>
+    </mpigroup>
+    <mpigroup name="group_node_Index">
+      <member mpiglobalrank="40" mpilocalrank="0" programName="Index"/>
+      <member mpiglobalrank="41" mpilocalrank="1" programName="Index"/>
+      <member mpiglobalrank="42" mpilocalrank="2" programName="Index"/>
+      <member mpiglobalrank="43" mpilocalrank="3" programName="Index"/>
+    </mpigroup>
+  </GroupModel>
+  <CommunicationModel>
+    <dataconnection name="connection_group_node_Dump_group_node_Filter" receiverMpiGroup="group_node_Filter" sendingGroup="group_node_Dump" type="symmetric"/>
+    <dataconnection name="connection_group_node_Filter_group_node_Tokenize" receiverMpiGroup="group_node_Tokenize" sendingGroup="group_node_Filter" type="symmetric"/>
+    <dataconnection name="connection_group_node_Tokenize_group_node_Segment" receiverMpiGroup="group_node_Segment" sendingGroup="group_node_Tokenize" type="symmetric"/>
+    <dataconnection name="connection_group_node_Segment_group_node_PartOfSpeech" receiverMpiGroup="group_node_PartOfSpeech" sendingGroup="group_node_Segment" type="symmetric"/>
+    <dataconnection name="connection_group_node_PartOfSpeech_group_node_Gender" receiverMpiGroup="group_node_Gender" sendingGroup="group_node_PartOfSpeech" type="symmetric"/>
+    <dataconnection name="connection_group_node_PartOfSpeech_group_node_Lemma" receiverMpiGroup="group_node_Lemma" sendingGroup="group_node_PartOfSpeech" type="symmetric"/>
+    <dataconnection name="connection_group_node_PartOfSpeech_group_node_Ner" receiverMpiGroup="group_node_Ner" sendingGroup="group_node_PartOfSpeech" type="symmetric"/>
+    <dataconnection name="connection_group_node_PartOfSpeech_group_node_Parse" receiverMpiGroup="group_node_Parse" sendingGroup="group_node_PartOfSpeech" type="symmetric"/>
+    <dataconnection name="connection_group_node_Parse_group_node_Sentiment" receiverMpiGroup="group_node_Sentiment" sendingGroup="group_node_Parse" type="symmetric"/>
+    <dataconnection name="connection_group_node_Sentiment_group_node_Index" receiverMpiGroup="group_node_Index" sendingGroup="group_node_Sentiment" type="symmetric"/>
+    <dataconnection name="connection_group_node_Gender_group_node_Index" receiverMpiGroup="group_node_Index" sendingGroup="group_node_Gender" type="symmetric"/>
+    <dataconnection name="connection_group_node_Lemma_group_node_Index" receiverMpiGroup="group_node_Index" sendingGroup="group_node_Lemma" type="symmetric"/>
+    <dataconnection name="connection_group_node_Ner_group_node_Index" receiverMpiGroup="group_node_Index" sendingGroup="group_node_Ner" type="symmetric"/>
+  </CommunicationModel>
+  <DeploymentModel>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="0"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="1"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="2"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="3"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="4"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="5"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="6"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="7"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="8"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="9"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="10"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="11"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="12"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="13"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="14"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="15"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="16"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="17"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="18"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="19"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="20"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="21"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="22"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="23"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="24"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="25"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="26"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="27"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="28"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="29"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="30"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="31"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="32"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="33"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="34"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="35"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="36"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="37"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="38"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="39"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="40"/>
+    <cloudnode hostipaddr="147.229.13.123" mpiglobalrank="41"/>
+    <cloudnode hostipaddr="147.229.13.124" mpiglobalrank="42"/>
+    <cloudnode hostipaddr="147.229.12.153" mpiglobalrank="43"/>
+  </DeploymentModel>
+</application>

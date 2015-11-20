@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<application name="BUT_Streams">
+  <ProgramModel>
+    <program javaclass="cz.vutbr.fit.Write" name="Write"/>
+    <program javaclass="cz.vutbr.fit.Storage" name="Storage"/>
+    <program javaclass="cz.vutbr.fit.Unify" name="Unify"/>
+    <program javaclass="cz.vutbr.fit.Join" name="Join"/>
+  </ProgramModel>
+  <GroupModel>
+    <mpigroup name="group_node_Storage">
+      <member mpiglobalrank="0" mpilocalrank="0" programName="Storage"/>
+      <member mpiglobalrank="1" mpilocalrank="1" programName="Storage"/>
+      <member mpiglobalrank="2" mpilocalrank="2" programName="Storage"/>
+      <member mpiglobalrank="3" mpilocalrank="3" programName="Storage"/>
+    </mpigroup>
+    <mpigroup name="group_node_Join">
+      <member mpiglobalrank="4" mpilocalrank="0" programName="Join"/>
+      <member mpiglobalrank="5" mpilocalrank="1" programName="Join"/>
+    </mpigroup>
+    <mpigroup name="group_node_Unify">
+      <member mpiglobalrank="6" mpilocalrank="0" programName="Unify"/>
+    </mpigroup>
+    <mpigroup name="group_node_Write">
+      <member mpiglobalrank="7" mpilocalrank="0" programName="Write"/>
+    </mpigroup>
+  </GroupModel>
+  <CommunicationModel>
+    <dataconnection name="connection_group_node_Unify_group_node_Write" receiverMpiGroup="group_node_Write" sendingGroup="group_node_Unify" type="symmetric"/>
+    <dataconnection name="connection_group_node_Join_group_node_Write" receiverMpiGroup="group_node_Write" sendingGroup="group_node_Join" type="symmetric"/>
+    <dataconnection name="connection_group_node_Storage_group_node_Unify" receiverMpiGroup="group_node_Unify" sendingGroup="group_node_Storage" type="symmetric"/>
+    <dataconnection name="connection_group_node_Storage_group_node_Join" receiverMpiGroup="group_node_Join" sendingGroup="group_node_Storage" type="symmetric"/>
+  </CommunicationModel>
+  <DeploymentModel>
+    <cloudnode hostipaddr="147.229.12.152" mpiglobalrank="0"/>
+    <cloudnode hostipaddr="147.229.12.152" mpiglobalrank="1"/>
+    <cloudnode hostipaddr="147.229.12.152" mpiglobalrank="2"/>
+    <cloudnode hostipaddr="147.229.12.152" mpiglobalrank="3"/>
+    <cloudnode hostipaddr="147.229.12.172" mpiglobalrank="4"/>
+    <cloudnode hostipaddr="147.229.12.172" mpiglobalrank="5"/>
+    <cloudnode hostipaddr="147.229.12.172" mpiglobalrank="6"/>
+    <cloudnode hostipaddr="147.229.12.172" mpiglobalrank="7"/>
+  </DeploymentModel>
+</application>

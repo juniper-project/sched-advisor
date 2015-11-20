@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<application name="BUT_Streams">
+  <ProgramModel>
+    <program javaclass="cz.vutbr.fit.Write" name="Write"/>
+    <program javaclass="cz.vutbr.fit.Storage" name="Storage"/>
+    <program javaclass="cz.vutbr.fit.Unify" name="Unify"/>
+    <program javaclass="cz.vutbr.fit.Join" name="Join"/>
+  </ProgramModel>
+  <GroupModel>
+    <mpigroup name="group_node_Write">
+      <member mpiglobalrank="0" mpilocalrank="0" programName="Write"/>
+    </mpigroup>
+    <mpigroup name="group_node_Join">
+      <member mpiglobalrank="1" mpilocalrank="0" programName="Join"/>
+    </mpigroup>
+    <mpigroup name="group_node_Unify">
+      <member mpiglobalrank="2" mpilocalrank="0" programName="Unify"/>
+    </mpigroup>
+    <mpigroup name="group_node_Storage">
+      <member mpiglobalrank="3" mpilocalrank="0" programName="Storage"/>
+    </mpigroup>
+  </GroupModel>
+  <CommunicationModel>
+    <dataconnection name="connection_group_node_Unify_group_node_Write" receiverMpiGroup="group_node_Write" sendingGroup="group_node_Unify" type="symmetric"/>
+    <dataconnection name="connection_group_node_Unify_group_node_Write_return" receiverMpiGroup="group_node_Unify" sendingGroup="group_node_Write" type="symmetric"/>
+    <dataconnection name="connection_group_node_Join_group_node_Write" receiverMpiGroup="group_node_Write" sendingGroup="group_node_Join" type="symmetric"/>
+    <dataconnection name="connection_group_node_Join_group_node_Write_return" receiverMpiGroup="group_node_Join" sendingGroup="group_node_Write" type="symmetric"/>
+    <dataconnection name="connection_group_node_Storage_group_node_Unify" receiverMpiGroup="group_node_Unify" sendingGroup="group_node_Storage" type="symmetric"/>
+    <dataconnection name="connection_group_node_Storage_group_node_Unify_return" receiverMpiGroup="group_node_Storage" sendingGroup="group_node_Unify" type="symmetric"/>
+    <dataconnection name="connection_group_node_Storage_group_node_Join" receiverMpiGroup="group_node_Join" sendingGroup="group_node_Storage" type="symmetric"/>
+    <dataconnection name="connection_group_node_Storage_group_node_Join_return" receiverMpiGroup="group_node_Storage" sendingGroup="group_node_Join" type="symmetric"/>
+  </CommunicationModel>
+  <DeploymentModel>
+    <cloudnode hostipaddr="127.0.0.1" mpiglobalrank="0"/>
+    <cloudnode hostipaddr="127.0.0.1" mpiglobalrank="1"/>
+    <cloudnode hostipaddr="127.0.0.1" mpiglobalrank="2"/>
+    <cloudnode hostipaddr="127.0.0.1" mpiglobalrank="3"/>
+  </DeploymentModel>
+</application>

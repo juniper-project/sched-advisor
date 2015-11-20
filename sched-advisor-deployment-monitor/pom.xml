@@ -1,0 +1,76 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- Project Information -->
+	<name>Scheduling Advisor Deployment Monitor</name>
+	<description>The project to provide implementations of clients to access a remote monitoring service and provide monitoring data received from the service.</description>
+	<inceptionYear>2015</inceptionYear>
+
+	<!-- POM Relationships -->
+	<parent>
+		<groupId>eu.juniper</groupId>
+		<artifactId>sched-advisor</artifactId>
+		<version>1.0</version>
+	</parent>
+	<groupId>eu.juniper</groupId>
+	<artifactId>sched-advisor-deployment-monitor</artifactId>
+	<version>1.0</version>
+	<dependencies>
+		<dependency>
+			<groupId>eu.juniper</groupId>
+			<artifactId>sched-advisor-deployment-model</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.juniper</groupId>
+			<artifactId>monitoring</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.190</version>
+		</dependency>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>eu.juniper.sa.deployment.monitor.MonitoringDbServer</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

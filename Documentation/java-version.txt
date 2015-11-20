@@ -1,0 +1,12 @@
+=== Java ===
+
+/usr/bin/java -> /etc/alternatives/java -> /usr/lib/jvm/java-8-oracle/jre/bin/java
+$ /usr/lib/jvm/java-8-oracle/jre/bin/java -version
+java version "1.8.0_45"
+Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
+Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)
+
+/usr/local/jamaica -> /usr/local/jamaica-6.4dev-0
+$ /usr/local/jamaica-6.4dev-0/bin/jamaicavm -version
+java version "1.6.0"
+Jamaica Virtual Machine Version 6.4dev Release 0 (64bit)

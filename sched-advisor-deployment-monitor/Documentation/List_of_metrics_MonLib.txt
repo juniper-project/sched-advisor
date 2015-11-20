@@ -1,0 +1,98 @@
+mem_avail		Available memory
+mem_used		Used memory
+
+=== Supported PAPI-C events ===
+PAPI_BR_CN		Conditional branch instructions
+PAPI_BR_INS		Branch instructions
+PAPI_BR_MSP		Conditional branch instructions mis-predicted
+PAPI_BR_NTK		Conditional branch instructions not taken
+PAPI_BR_PRC		Conditional branch instructions correctly predicted
+PAPI_BR_UCN		Unconditional branch instructions
+PAPI_BR_TKN		Conditional branch instructions taken
+PAPI_DP_OPS		Floating point operations; optimized to count scaled double precision vector operations
+PAPI_FDV_INS		Floating point divide instructions
+PAPI_FP_INS		Floating point instructions
+PAPI_FP_OPS		Floating point operations
+PAPI_L1_DCM		Level 1 data cache misses
+PAPI_L1_ICM		Level 1 instruction cache misses
+PAPI_L1_LDM		Level 1 load misses
+PAPI_L1_STM		Level 1 store misses
+PAPI_L1_TCM		Level 1 cache misses
+PAPI_L2_DCA		Level 2 data cache accesses
+PAPI_L2_DCH		Level 2 data cache hits
+PAPI_L2_DCM		Level 2 data cache misses
+PAPI_L2_ICM		Level 2 instruction cache misses
+PAPI_L2_STM		Level 2 store misses
+PAPI_L2_TCM		Level 2 cache misses
+PAPI_L2_DCR		Level 2 data cache reads
+PAPI_L2_DCW		Level 2 data cache writes
+PAPI_L2_TCW		Level 2 total cache writes
+PAPI_L2_ICH		Level 2 instruction
+PAPI_L2_ICR		Level 2 instruction cache reads
+PAPI_L2_ICA		Level 2 instruction cache accesses
+PAPI_L2_TCA		Level 2 total cache accesses
+PAPI_L2_TCR		Level 2 total cache reads
+PAPI_L3_DCA		Level 3 data cache accesses
+PAPI_L3_DCR		Level 3 data cache reads
+PAPI_L3_DCW		Level 3 data cache writes
+PAPI_L3_ICA		Level 3 instruction cache accesses
+PAPI_L3_ICR		Level 3 instruction cache reads
+PAPI_L3_TCA		Level 3 total cache accesses
+PAPI_L3_TCM		Level 3 cache misses
+PAPI_L3_TCR		Level 3 total cache reads
+PAPI_L3_TCW		Level 3 total cache writes
+PAPI_LD_INS		Load instructions
+PAPI_REF_CYC		Reference clock cycles
+PAPI_SP_OPS		Floating point operations; optimized to count scaled single precision vector operations
+PAPI_SR_INS		Store instructions
+PAPI_STL_ICY		Cycles with no instruction issue
+PAPI_TLB_DM		Data translation look-aside buffer misses
+PAPI_TLB_IM		Instruction translation look-aside buffer misses
+PAPI_TOT_CYC		Total cycles
+PAPI_TOT_INS		Instructions completed
+PAPI_VEC_DP		Double precision vector/SIMD instructions
+PAPI_VEC_SP		Single precision vector/SIMD instructions
+
+=== List of supported RAPL events ===
+DRAM_ENERGY:PACKAGE0			Energy used by package DRAM
+DRAM_ENERGY:PACKAGE1			Energy used by package DRAM
+MAXIMUM_POWER:PACKAGE0		Maximum power used by chip package (W)
+MAXIMUM_POWER:PACKAGE1		Maximum power used by chip package (W)
+MAXIMUM_POWER_CNT:PACKAGE0
+MAXIMUM_POWER_CNT:PACKAGE1
+MAXIMUM_TIME_WINDOW:PACKAGE0	Maximum time window (s)
+MAXIMUM_TIME_WINDOW:PACKAGE1	Maximum time window (s)
+MAXIMUM_TIME_WINDOW_CNT:PACKAGE0
+MAXIMUM_TIME_WINDOW_CNT:PACKAGE1
+MINIMUM_POWER:PACKAGE0		Minimum power used by chip package (W)
+MINIMUM_POWER:PACKAGE1		Minimum power used by chip package (W)
+MINIMUM_POWER_CNT:PACKAGE0
+MINIMUM_POWER_CNT:PACKAGE1
+PACKAGE_ENERGY:PACKAGE0		Energy used by chip package (nJ)
+PACKAGE_ENERGY:PACKAGE1		Energy used by chip package (nJ)
+PACKAGE_ENERGY_CNT:PACKAGE0
+PACKAGE_ENERGY_CNT:PACKAGE1
+PP0_ENERGY:PACKAGE0			Power-plane zero package energy (nJ)
+PP0_ENERGY:PACKAGE1			Power-plane zero package energy (nJ)
+PP0_ENERGY_CNT:PACKAGE0
+PP0_ENERGY_CNT:PACKAGE1
+THERMAL_SPEC:PACKAGE0			Thermal specification (W)
+THERMAL_SPEC:PACKAGE1			Thermal specification (W)
+THERMAL_SPEC_CNT:PACKAGE0
+THERMAL_SPEC_CNT:PACKAGE1
+
+=== List of supported Likwid events ===
+DRAM_ENERGY:PACKAGE0			Energy used by package DRAM
+DRAM_ENERGY:PACKAGE1			Energy used by package DRAM
+MAXIMUM_POWER:PACKAGE0		Maximum power used by chip package (W)
+MAXIMUM_POWER:PACKAGE1		Maximum power used by chip package (W)
+MAXIMUM_TIME_WINDOW:PACKAGE0	Maximum time window (s)
+MAXIMUM_TIME_WINDOW:PACKAGE1	Maximum time window (s)
+MINIMUM_POWER:PACKAGE0		Minimum power used by chip package (W)
+MINIMUM_POWER:PACKAGE1		Minimum power used by chip package (W)
+PACKAGE_ENERGY:PACKAGE0		Energy used by chip package (nJ)
+PACKAGE_ENERGY:PACKAGE1		Energy used by chip package (nJ)
+PP0_ENERGY:PACKAGE0			Power-plane zero package energy (nJ)
+PP0_ENERGY:PACKAGE1			Power-plane zero package energy (nJ)
+PP1_ENERGY:PACKAGE0			Power-plane one package energy (nJ)
+PP1_ENERGY:PACKAGE1			Power-plane one package energy (nJ)

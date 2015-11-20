@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- Project Information -->
+	<name>Sample Juniper Application for BUT-petaFuel</name>
+	<description>A Juniper application implementing the petaFuel topology based on a Storm/MPI implementation provided by BUT with monitoring support.</description>
+	<inceptionYear>2015</inceptionYear>
+	<licenses>
+		<license>
+			<name>proprietary</name>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>ikouril</id>
+			<name>Jan Kouřil</name>
+			<email>ikouril@fit.vutbr.cz</email>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<organization>BUT FIT</organization>
+			<timezone>+1</timezone>
+		</developer>
+	</developers>
+	<organization>
+		<name>Brno University of Technology, Faculty of Information Technology</name>
+		<url>http://www.fit.vutbr.cz/.en</url>
+	</organization>
+
+	<!-- POM Relationships -->
+	<parent>
+		<groupId>eu.juniper</groupId>
+		<artifactId>sched-advisor</artifactId>
+		<version>1.0</version>
+	</parent>
+	<groupId>eu.juniper</groupId>
+	<artifactId>sample-butpf</artifactId>
+	<version>0.1-SNAPSHOT</version>
+	<properties>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>eu.juniper</groupId>
+			<artifactId>juniperplatform</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.juniper</groupId>
+			<artifactId>monitoring</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.modelio.juniper</groupId>
+			<artifactId>JuniperAPI</artifactId>
+			<version>0.1.147</version>
+		</dependency>
+		<dependency>
+			<groupId>com.modeliosoft.modelio</groupId>
+			<artifactId>javadesigner</artifactId>
+			<version>0</version>
+		</dependency>
+		<dependency>
+			<groupId>mpi</groupId>
+			<artifactId>openmpi</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.7</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.juniper</groupId>
+			<artifactId>sched-advisor-monitoring-agent</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
+
+</project>
