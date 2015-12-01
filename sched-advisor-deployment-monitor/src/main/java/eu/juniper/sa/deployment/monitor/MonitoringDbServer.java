@@ -41,6 +41,8 @@ import org.h2.tools.Server;
  */
 public class MonitoringDbServer {
 
+    final static String KEEP_RUNNING_SYSTEM_PROPERTY_NAME = "KeepRunning";
+
     public static void main(String[] args) throws SQLException, ClassNotFoundException, IOException {
         if (args.length < 1) {
             final String className = MonitoringDbServer.class.getCanonicalName();
@@ -48,7 +50,8 @@ public class MonitoringDbServer {
                     + "Usage: " + className + " [h2-server-args ...] <h2-db-file-or-jdbc-uri>\n"
                     + "Run a H2 database TCP server with given options (optional) and open or create a database in a given file.\n"
                     + "The database is ready to be used by monitoring agents.\n"
-                    + "Supported options for the server are: -tcpPort, -tcpSSL, -tcpPassword, -tcpAllowOthers, -tcpDaemon, -trace, -ifExists, -baseDir, -key."
+                    + "Supported options for the server are: -tcpPort, -tcpSSL, -tcpPassword, -tcpAllowOthers, -tcpDaemon, -trace, -ifExists, -baseDir, -key.\n"
+                    + "Use system property " + KEEP_RUNNING_SYSTEM_PROPERTY_NAME + ", i.e. -D" + KEEP_RUNNING_SYSTEM_PROPERTY_NAME + ", to keep the server running forever (until killed)."
             );
             System.exit(-1);
         }
@@ -68,8 +71,24 @@ public class MonitoringDbServer {
             monitoringService.createDatabaseTables();
         }
         // wait for clients
-        System.out.println("*** Waiting for clients connecting to the JDBC URL above...\n"
-                + "*** (press Enter to close the database, shutdown the server, and quit)");        System.in.read();
+        System.out.println("*** Waiting for clients connecting to the JDBC URL above...");
+        // waiting for Enter or (in)finite waiting in a loop
+        if (System.getProperty(KEEP_RUNNING_SYSTEM_PROPERTY_NAME) != null) {
+            System.out.println("*** (kill the application to close the database, shutdown the server, and quit)");
+            final Long sleepTimeMilis = Long.getLong(KEEP_RUNNING_SYSTEM_PROPERTY_NAME, Long.MAX_VALUE);
+            while (true) {
+                try {
+                    Thread.sleep(sleepTimeMilis);
+                    System.out.println("*** still waiting...");
+                }
+                catch (InterruptedException ex) {
+                    // NOP
+                }
+            }
+        } else {
+            System.out.println("*** (press Enter to close the database, shutdown the server, and quit)");
+            System.in.read();
+        }
         // shut down
         System.out.println("*** Stopping the H2 database TCP server...");
         server.stop();

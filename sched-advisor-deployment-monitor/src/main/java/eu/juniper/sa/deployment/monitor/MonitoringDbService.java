@@ -301,6 +301,11 @@ public class MonitoringDbService implements MonitoringServiceInterface, AutoClos
         }
     }
 
+    /**
+     * @deprecated used query <code>SQL_DELETE_OLD_PROGRAM_RUNTIMES</code> to
+     * delete all records and their metrics but those with maximal record time
+     * (the latest) is very slow for large data
+     */
     private int removeRedundancyInDatabaseTables(Statement statement) throws SQLException {
         return statement.executeUpdate(MonitoringDbService.SQL_DELETE_OLD_PROGRAM_RUNTIMES);
     }
@@ -312,6 +317,8 @@ public class MonitoringDbService implements MonitoringServiceInterface, AutoClos
      *
      * @return number of removed database records
      * @throws SQLException if a database access error occurs
+     * @deprecated the query used to delete all records and their metrics but
+     * those with maximal record time (the latest) is very slow for large data
      */
     public int removeRedundancyInDatabaseTables() throws SQLException {
         try (Statement statement = this.databaseConnection.createStatement()) {
@@ -369,7 +376,8 @@ public class MonitoringDbService implements MonitoringServiceInterface, AutoClos
         try (Statement statement = this.databaseConnection.createStatement()) {
             statement.execute("RUNSCRIPT FROM '" + importSqlScriptFilename + "'"
                     + compression + ";");
-            this.removeRedundancyInDatabaseTables(statement);
+            // we do not delete redundant rows as it is too slow (have to cope with them during the analysis)
+            //this.removeRedundancyInDatabaseTables(statement);
         }
     }
 
