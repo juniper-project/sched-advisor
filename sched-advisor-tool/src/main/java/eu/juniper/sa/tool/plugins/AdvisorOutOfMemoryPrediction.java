@@ -98,18 +98,18 @@ public class AdvisorOutOfMemoryPrediction extends AdvisorUsingDatabaseAbstract i
     private final static String[] QUERY_metricsInProgramRuntime = {"ProgramGlobalRank", "UsedHeapMemory", "UsedNonHeapMemory", "UsedSwapSpaceSize"};
     private final static String QUERY
             = "SELECT ProgramRuntime.ProgramGlobalRank AS ProgramGlobalRank, ProgramRuntimeAvg.AvgTime AS AvgTime,\n"
-            + "  CASEWHEN(SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime) = 0, 0, SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedHeapMemory-ProgramRuntimeAvg.AvgUsedHeapMemory))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2))) AS Beta1UsedHeapMemory,\n"
+            + "  CASE WHEN SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)=0 THEN 0 ELSE SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedHeapMemory-ProgramRuntimeAvg.AvgUsedHeapMemory))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2)) END AS Beta1UsedHeapMemory,\n"
             + "  ProgramRuntimeAvg.AvgUsedHeapMemory AS AvgUsedHeapMemory,\n"
-            + "  CASEWHEN(SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime) = 0, 0, SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedNonHeapMemory-ProgramRuntimeAvg.AvgUsedNonHeapMemory))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2))) AS Beta1UsedNonHeapMemory,\n"
+            + "  CASE WHEN SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)=0 THEN 0 ELSE SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedNonHeapMemory-ProgramRuntimeAvg.AvgUsedNonHeapMemory))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2)) END AS Beta1UsedNonHeapMemory,\n"
             + "  ProgramRuntimeAvg.AvgUsedNonHeapMemory AS AvgUsedNonHeapMemory,\n"
-            + "  CASEWHEN(SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime) = 0, 0, SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedSwapSpaceSize-ProgramRuntimeAvg.AvgUsedSwapSpaceSize))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2))) AS Beta1UsedSwapSpaceSize,\n"
+            + "  CASE WHEN SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)=0 THEN 0 ELSE SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedSwapSpaceSize-ProgramRuntimeAvg.AvgUsedSwapSpaceSize))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2)) END AS Beta1UsedSwapSpaceSize,\n"
             + "  ProgramRuntimeAvg.AvgUsedSwapSpaceSize AS AvgUsedSwapSpaceSize\n"
             + "FROM\n"
             + "  (SELECT m0.numericvalue AS ProgramGlobalRank,\n"
             + "    m1.numericvalue AS UsedHeapMemory,\n"
             + "    m2.numericvalue AS UsedNonHeapMemory,\n"
             + "    m3.numericvalue AS UsedSwapSpaceSize,\n"
-            + "    DATEDIFF('SECOND', ?, records.time) AS Time\n"
+            + "    EXTRACT(SECOND FROM CAST(? AS timestamp)) - EXTRACT(SECOND FROM records.time) AS Time\n"
             + AdvisorUsingDatabaseAbstract.generateFromWhereFragment("ProgramRuntime", QUERY_metricsInProgramRuntime)
             + "  AND (records.time BETWEEN ? AND ?)\n"
             + "  ) ProgramRuntime\n"
@@ -118,16 +118,16 @@ public class AdvisorOutOfMemoryPrediction extends AdvisorUsingDatabaseAbstract i
             + "    AVG(m1.numericvalue) AS AvgUsedHeapMemory,\n"
             + "    AVG(m2.numericvalue) AS AvgUsedNonHeapMemory,\n"
             + "    AVG(m3.numericvalue) AS AvgUsedSwapSpaceSize,\n"
-            + "    AVG(DATEDIFF('SECOND', ?, records.time)) AS AvgTime\n"
+            + "    AVG(EXTRACT(SECOND FROM CAST(? AS timestamp)) - EXTRACT(SECOND FROM records.time)) AS AvgTime\n"
             + AdvisorUsingDatabaseAbstract.generateFromWhereFragment("ProgramRuntime", QUERY_metricsInProgramRuntime)
             + "  AND (records.time BETWEEN ? AND ?)\n"
-            + "  GROUP BY ProgramGlobalRank\n"
+            + "  GROUP BY m0.numericvalue\n"
             + "  ) ProgramRuntimeAvg ON (ProgramRuntime.ProgramGlobalRank = ProgramRuntimeAvg.ProgramGlobalRank)\n"
-            + "GROUP BY ProgramRuntime.ProgramGlobalRank\n"
-            + "HAVING Beta1UsedHeapMemory >= ?\n"
-            + "OR Beta1UsedNonHeapMemory >= ?\n"
-            + "OR Beta1UsedSwapSpaceSize >= ?\n"
-            + "ORDER BY ProgramGlobalRank;";
+            + "GROUP BY ProgramRuntime.ProgramGlobalRank, ProgramRuntimeAvg.AvgTime, ProgramRuntimeAvg.AvgUsedHeapMemory, ProgramRuntimeAvg.AvgUsedNonHeapMemory, ProgramRuntimeAvg.AvgUsedSwapSpaceSize\n"
+            + "HAVING CASE WHEN SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)=0 THEN 0 ELSE SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedHeapMemory-ProgramRuntimeAvg.AvgUsedHeapMemory))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2)) END >= ?\n"
+            + "OR CASE WHEN SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)=0 THEN 0 ELSE SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedNonHeapMemory-ProgramRuntimeAvg.AvgUsedNonHeapMemory))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2)) END >= ?\n"
+            + "OR CASE WHEN SUM(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)=0 THEN 0 ELSE SUM((ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime)*(ProgramRuntime.UsedSwapSpaceSize-ProgramRuntimeAvg.AvgUsedSwapSpaceSize))/SUM(POWER(ProgramRuntime.Time-ProgramRuntimeAvg.AvgTime, 2)) END >= ?\n"
+            + "ORDER BY ProgramGlobalRank ASC;";
     //      + "ORDER BY Beta1UsedHeapMemory+Beta1UsedNonHeapMemory+Beta1UsedSwapSpaceSize;"; // cannot by ordered by calculated columns
     private final static String[] QUERY_metricsInProgramRuntime_max = {"ProgramGlobalRank"};
     private final static String QUERY_MAX

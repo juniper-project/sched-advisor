@@ -27,6 +27,9 @@
  */
 package eu.juniper.sa.deployment.monitor;
 
+import eu.juniper.sa.deployment.monitor.db.MonitoringDbActionsAbstract;
+import eu.juniper.sa.deployment.monitor.db.MonitoringDbActionsForH2;
+import eu.juniper.sa.deployment.monitor.db.MonitoringDbActionsInterface;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -51,7 +54,10 @@ public class MonitoringDbServer {
                     + "Run a H2 database TCP server with given options (optional) and open or create a database in a given file.\n"
                     + "The database is ready to be used by monitoring agents.\n"
                     + "Supported options for the server are: -tcpPort, -tcpSSL, -tcpPassword, -tcpAllowOthers, -tcpDaemon, -trace, -ifExists, -baseDir, -key.\n"
-                    + "Use system property " + KEEP_RUNNING_SYSTEM_PROPERTY_NAME + ", i.e. -D" + KEEP_RUNNING_SYSTEM_PROPERTY_NAME + ", to keep the server running forever (until killed)."
+                    + "Use system property " + KEEP_RUNNING_SYSTEM_PROPERTY_NAME + ", i.e. -D" + KEEP_RUNNING_SYSTEM_PROPERTY_NAME + ", to keep the server running forever (until killed).\n"
+                    + "JDBC username and password can be set by system properties as"
+                    + " -D" + MonitoringDbActionsAbstract.SYSTEM_PROPERTY_NAME_FOR_JDBC_USER + "=username and"
+                    + " -D" + MonitoringDbActionsAbstract.SYSTEM_PROPERTY_NAME_FOR_JDBC_PASSWORD + "=password."
             );
             System.exit(-1);
         }
@@ -66,10 +72,9 @@ public class MonitoringDbServer {
                 : "jdbc:h2:" + server.getURL() + "/" + (new File(argsLast)).getAbsolutePath() + ";COMPRESS=TRUE";
         System.out.println("*** Openning/creating JDBC database for monitoring results cache:\n"
                 + "*** " + jdbcUrl);
-        try (MonitoringDbService monitoringService = new MonitoringDbService(null, null, jdbcUrl, "org.h2.Driver")) {
-            System.out.println("*** Creating database tables (if not exist)...");
-            monitoringService.createDatabaseTables();
-        }
+        MonitoringDbActionsInterface monitoringDbActions = new MonitoringDbActionsForH2(jdbcUrl);
+        System.out.println("*** Creating database tables (if not exist)...");
+        monitoringDbActions.createDatabaseTables();
         // wait for clients
         System.out.println("*** Waiting for clients connecting to the JDBC URL above...");
         // waiting for Enter or (in)finite waiting in a loop

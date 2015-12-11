@@ -80,12 +80,12 @@ public class AdvisorGarbageCollectionPerformance extends AdvisorUsingDatabaseAbs
             + "  AVG(m1.numericvalue) AS ProgramDurationAvg,\n"
             + "  SUM(m2.numericvalue) AS GarbageCollectionCount,\n"
             + "  SUM(m3.numericvalue) AS GarbageCollectionTimeSum,\n"
-            + "  CASEWHEN(SUM(m2.numericvalue) = 0, 0, SUM(m3.numericvalue)/SUM(m2.numericvalue)) AS GarbageCollectionTimeAvg,\n"
-            + "  CASEWHEN(SUM(m1.numericvalue) = 0, 0, SUM(m3.numericvalue)/SUM(m1.numericvalue)) AS GarbageCollectionToExecutionDurationRatio\n"
+            + "  CASE WHEN SUM(m2.numericvalue)=0 THEN 0 ELSE SUM(m3.numericvalue)/SUM(m2.numericvalue) END AS GarbageCollectionTimeAvg,\n"
+            + "  CASE WHEN SUM(m1.numericvalue)=0 THEN 0 ELSE SUM(m3.numericvalue)/SUM(m1.numericvalue) END AS GarbageCollectionToExecutionDurationRatio\n"
             + AdvisorUsingDatabaseAbstract.generateFromWhereFragment("ProgramRuntime", QUERY_metricsInProgramRuntime)
             + "AND (records.time BETWEEN ? AND ?)\n"
             + "GROUP BY ProgramGlobalRank\n"
-            + "HAVING GarbageCollectionToExecutionDurationRatio >= ?\n"
+            + "HAVING CASE WHEN SUM(m1.numericvalue)=0 THEN 0 ELSE SUM(m3.numericvalue)/SUM(m1.numericvalue) END >= ?\n"
             + "ORDER BY GarbageCollectionToExecutionDurationRatio DESC;";
 
     /**

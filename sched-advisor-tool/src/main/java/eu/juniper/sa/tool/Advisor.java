@@ -31,6 +31,8 @@ import eu.juniper.sa.deployment.model.JuniperApplication;
 import eu.juniper.sa.deployment.plan.XMLDeploymentPlan;
 import eu.juniper.sa.deployment.plan.XMLDeploymentPlanException;
 import eu.juniper.sa.deployment.monitor.MonitoringDbService;
+import eu.juniper.sa.deployment.monitor.db.MonitoringDbActionsAbstract;
+import eu.juniper.sa.deployment.monitor.db.MonitoringDbActionsFactory;
 import eu.juniper.sa.tool.utils.ClassFinder;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -60,7 +62,7 @@ public class Advisor {
     private final static String PLUGINS_PACKAGE = "eu.juniper.sa.tool.plugins";
     private final static String PROPERTY_NAME_KEEP_DB_TEMP_FILE = "KeepDbTempFile";
 
-    public static void main(String[] args) throws FileNotFoundException, XMLStreamException, XMLDeploymentPlanException, ClassNotFoundException, SQLException, IOException, AdvisorException {
+    public static void main(String[] args) throws FileNotFoundException, XMLStreamException, XMLDeploymentPlanException, ClassNotFoundException, SQLException, IOException, AdvisorException, MonitoringDbActionsFactory.UnkownJdbcDatabase {
         if ((args.length < 3) || (args.length > 5)) {
             final String className = Advisor.class.getCanonicalName();
             System.err.println(""
@@ -76,6 +78,9 @@ public class Advisor {
                     + "Properties (-D<property>=<value> Java parameters):\n"
                     + "* properties of loaded advisor plugins can be set by Java system properties, e.g., -DAdvisorOutOfMemoryPrediction.disabled, -DAdvisorDataTransferOverhead.receivingToExecutionDurationRatio=0.25, etc.; run 'eu.juniper.sa.tool.utils.ClassFinder eu.juniper.sa.tool.plugins' for a list of available properties\n"
                     + "* use " + PROPERTY_NAME_KEEP_DB_TEMP_FILE + " (i.e., -D" + PROPERTY_NAME_KEEP_DB_TEMP_FILE + ") to keep a temporary database file for the database cache\n"
+                    + "* JDBC username and password can be set as"
+                    + " -D" + MonitoringDbActionsAbstract.SYSTEM_PROPERTY_NAME_FOR_JDBC_USER + "=username and"
+                    + " -D" + MonitoringDbActionsAbstract.SYSTEM_PROPERTY_NAME_FOR_JDBC_PASSWORD + "=password\n"
                     + "\n"
             );
             System.exit(-1);
@@ -105,7 +110,7 @@ public class Advisor {
         final JuniperApplication juniperApplication = XMLDeploymentPlan.readJuniperApplication(deploymentPlan);
 
         System.out.println("*** openning/creating JDBC database for monitoring results cache " + jdbcUri);
-        try (MonitoringDbService monitoringService = new MonitoringDbService(
+        try (MonitoringDbService monitoringDbService = new MonitoringDbService(
                 (secondArgType == SecondArgType.MONITORING_SERVICE_URL) ? secondArg : null,
                 juniperApplication.getApplicationName(), jdbcUri)) {
 
@@ -115,16 +120,16 @@ public class Advisor {
                 }
                 break;
                 case MONITORING_SERVICE_URL: {
-                    monitoringService.createDatabaseTables();
+                    monitoringDbService.getMonitoringDbActions().createDatabaseTables();
                     System.out.println("*** importing metrics from " + secondArg);
                     System.out.println("*** number of imported metrics = "
-                            + monitoringService.importMetrics());
+                            + monitoringDbService.importMetrics());
                 }
                 break;
                 case SQL_DUMP_FILEPATH: {
-                    monitoringService.createDatabaseTables();
+                    monitoringDbService.getMonitoringDbActions().createDatabaseTables();
                     System.out.println("*** importing metrics from " + secondArg);
-                    monitoringService.importDatabase(secondArg);
+                    monitoringDbService.getMonitoringDbActions().importDatabase(secondArg);
                 }
                 break;
             }
@@ -135,7 +140,7 @@ public class Advisor {
                 if (AdvisorUsingDatabaseAbstract.class.isAssignableFrom(advisorClass)) {
                     System.out.println("*** loading and setting advisor plugin " + advisorClass.getCanonicalName());
                     // create new instance of advisorClass
-                    final AdvisorInterface advisorInstance = AdvisorUsingDatabaseAbstract.newInstance(advisorClass, juniperApplication, monitoringService.getDatabaseConnection());
+                    final AdvisorInterface advisorInstance = AdvisorUsingDatabaseAbstract.newInstance(advisorClass, juniperApplication, monitoringDbService.getMonitoringDbActions().getDatabaseConnection());
                     ((AdvisorUsingDatabaseAbstract) advisorInstance).setObjectProperties(System.getProperties());
                     if (advisorInstance.isEnabled()) {
                         // print information on the advisor
@@ -154,7 +159,7 @@ public class Advisor {
 
             if (jdbcUriTemp && (System.getProperty(Advisor.PROPERTY_NAME_KEEP_DB_TEMP_FILE) == null)) {
                 System.out.println("*** removing database files with monitoring results cache");
-                monitoringService.deleteDatabase();
+                monitoringDbService.getMonitoringDbActions().deleteDatabase();
             }
 
         }

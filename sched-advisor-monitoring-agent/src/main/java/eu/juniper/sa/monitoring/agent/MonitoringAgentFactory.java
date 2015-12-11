@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * The factory class to create various types of monitoring agent objects. If
@@ -44,9 +45,25 @@ import java.sql.SQLException;
  */
 public final class MonitoringAgentFactory {
 
-    private static final String STATUS_PROPERTY = "MonitoringAgentEnabled";
-    private static final String STATUS_VALUE = System.getProperty(MonitoringAgentFactory.STATUS_PROPERTY);
-    private static final String STATUS_PROPERTY_EXCEPTION = "System property " + MonitoringAgentFactory.STATUS_PROPERTY + " has to be set to a local file path of a monitoring SQL file, a JDBC connection to a monitoring database, or an URL of a monitoring service.";
+    /**
+     * System property name for a username for a JDBC connection to the database
+     * for the monitoring data.
+     */
+    public static final String SYSTEM_PROPERTY_NAME_FOR_JDBC_USER = "MonitoringAgentJdbcUser";
+    /**
+     * System property name for a password for a JDBC connection to the database
+     * for the monitoring data.
+     */
+    public static final String SYSTEM_PROPERTY_NAME_FOR_JDBC_PASSWORD = "MonitoringAgentJdbcPassword";
+
+    /**
+     * System property name for status (enabled if set, disabled if empty) of
+     * the monitoring agent.
+     */
+    public static final String SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS = "MonitoringAgentEnabled";
+
+    private static final String STATUS_VALUE = System.getProperty(MonitoringAgentFactory.SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS);
+    private static final String STATUS_PROPERTY_EXCEPTION = "System property " + MonitoringAgentFactory.SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS + " has to be set to a local file path of a monitoring SQL file, a JDBC connection to a monitoring database, or an URL of a monitoring service.";
     private static final String STATUS_VALUE_PREF_JDBC = "jdbc:";
     private static final String STATUS_VALUE_PREF_HTTP = "http://";
     private static final String STATUS_VALUE_PREF_HTTPS = "https://";
@@ -211,6 +228,20 @@ public final class MonitoringAgentFactory {
                 : new MonitoringAgentForNullDevice();
     }
 
+    private static Connection createDatabaseConnection(String jdbcUrl) throws SQLException {
+        // load JDBC user and password from system properties
+        final String jdbcUser = System.getProperty(SYSTEM_PROPERTY_NAME_FOR_JDBC_USER);
+        final String jdbcPassword = System.getProperty(SYSTEM_PROPERTY_NAME_FOR_JDBC_PASSWORD);
+        final Properties properties = new Properties();
+        if (jdbcUser != null) {
+            properties.setProperty("user", jdbcUser);
+        }
+        if (jdbcPassword != null) {
+            properties.setProperty("password", jdbcPassword);
+        }
+        return DriverManager.getConnection(jdbcUrl, properties);
+    }
+
     /**
      * Create a monitoring agent for monitoring of a given application to a
      * given monitoring SQL file, JDBC database, or a given monitoring service
@@ -232,7 +263,7 @@ public final class MonitoringAgentFactory {
     public static MonitoringAgentInterface createMonitoringAgent(String monitoringUrl, String applicationId, MonitoredResourcesStrategyInterface monitoredResourcesDefaultStrategy) throws IOException, SQLException {
         MonitoringAgentInterface monitoringAgent;
         if (monitoringUrl.startsWith(MonitoringAgentFactory.STATUS_VALUE_PREF_JDBC)) {
-            monitoringAgent = MonitoringAgentFactory.createMonitoringAgentForDatabase(DriverManager.getConnection(monitoringUrl), applicationId, monitoredResourcesDefaultStrategy);
+            monitoringAgent = MonitoringAgentFactory.createMonitoringAgentForDatabase(createDatabaseConnection(monitoringUrl), applicationId, monitoredResourcesDefaultStrategy);
         } else if (monitoringUrl.startsWith(MonitoringAgentFactory.STATUS_VALUE_PREF_HTTP) || monitoringUrl.startsWith(MonitoringAgentFactory.STATUS_VALUE_PREF_HTTPS)) {
             monitoringAgent = MonitoringAgentFactory.createMonitoringAgentForService(monitoringUrl, applicationId, monitoredResourcesDefaultStrategy);
         } else {
@@ -261,7 +292,7 @@ public final class MonitoringAgentFactory {
     public static MonitoringAgentInterface createMonitoringAgent(String monitoringUrl, String applicationId) throws IOException, SQLException {
         MonitoringAgentInterface monitoringAgent;
         if (monitoringUrl.startsWith(MonitoringAgentFactory.STATUS_VALUE_PREF_JDBC)) {
-            monitoringAgent = MonitoringAgentFactory.createMonitoringAgentForDatabase(DriverManager.getConnection(monitoringUrl), applicationId);
+            monitoringAgent = MonitoringAgentFactory.createMonitoringAgentForDatabase(createDatabaseConnection(monitoringUrl), applicationId);
         } else if (monitoringUrl.startsWith(MonitoringAgentFactory.STATUS_VALUE_PREF_HTTP) || monitoringUrl.startsWith(MonitoringAgentFactory.STATUS_VALUE_PREF_HTTPS)) {
             monitoringAgent = MonitoringAgentFactory.createMonitoringAgentForService(monitoringUrl, applicationId);
         } else {
@@ -274,9 +305,9 @@ public final class MonitoringAgentFactory {
      * Create a monitoring agent singleton (or utilize the previously created)
      * for monitoring of a given application to a predefined monitoring SQL
      * file, JDBC database, or monitoring service (if system property named
-     * according to <code>STATUS_PROPERTY</code> value is a local file path, a
-     * JDBC connection string, or an URL, respectively) with a given default
-     * monitored resource strategy.
+     * according to <code>SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS</code> value is
+     * a local file path, a JDBC connection string, or an URL, respectively)
+     * with a given default monitored resource strategy.
      *
      * @param applicationId an application ID
      * @param monitoredResourcesDefaultStrategy a default monitored resource
@@ -304,10 +335,10 @@ public final class MonitoringAgentFactory {
      * Create a monitoring agent singleton (or utilize the previously created)
      * for monitoring of a given application to a predefined monitoring SQL
      * file, JDBC database, or monitoring service (if system property named
-     * according to <code>STATUS_PROPERTY</code> value is a local file path, a
-     * JDBC connection string, or an URL, respectively) with
-     * <code>MonitoredResourcesDefaultStrategy</code> default monitored resource
-     * strategy.
+     * according to <code>SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS</code> value is
+     * a local file path, a JDBC connection string, or an URL, respectively)
+     * with <code>MonitoredResourcesDefaultStrategy</code> default monitored
+     * resource strategy.
      *
      * @param applicationId an application ID
      * @return a created monitoring agent
@@ -340,9 +371,12 @@ public final class MonitoringAgentFactory {
     }
 
     public static void main(String[] args) {
-        System.err.println(MonitoringAgentFactory.class.getCanonicalName() + ".enabled = " + MonitoringAgentFactory.enabled);
-        System.err.println("Set " + MonitoringAgentFactory.STATUS_PROPERTY + " system property to enable the class property above."
-                + " If createMonitoringAgentBySystemProperty is used, the system property value should be a local file path of a monitoring SQL file, a JDBC connection to a monitoring database, or an URL of a monitoring service."
-                + " Current value of " + MonitoringAgentFactory.STATUS_PROPERTY + " system property is '" + MonitoringAgentFactory.STATUS_VALUE + "'");
+        System.err.println(MonitoringAgentFactory.class.getCanonicalName() + ".enabled = " + MonitoringAgentFactory.enabled + "\n"
+                + "Set " + SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS + " system property to enable the class property above."
+                + " If createMonitoringAgentBySystemProperty method is used, the system property value should be a local file path of a monitoring SQL file, a JDBC connection to a monitoring database, or an URL of a monitoring service."
+                + " Current value of " + SYSTEM_PROPERTY_NAME_FOR_AGENT_STATUS + " system property is '" + STATUS_VALUE + "'\n"
+                + "JDBC username and password can be set by system properties as"
+                + " -D" + SYSTEM_PROPERTY_NAME_FOR_JDBC_USER + "=username and"
+                + " -D" + SYSTEM_PROPERTY_NAME_FOR_JDBC_PASSWORD + "=password.");
     }
 }

@@ -51,13 +51,17 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
     private final static String SQL_INSERT_RECORD = "INSERT INTO records(time, metrictype, hostname) VALUES (?, ?, ?);";
     private final static String SQL_INSERT_NUMERIC_VALUE = "INSERT INTO metrics(recordid, name, numericvalue) VALUES (?, ?, ?);";
     private final static String SQL_INSERT_TEXT_VALUE = "INSERT INTO metrics(recordid, name, textvalue) VALUES (?, ?, ?);";
+    private final Connection monitoringDatabaseConnection;
+    private final boolean previousAutoCommit;
 
     /**
      * Create a monitoring agent for monitoring of a given application to a
      * given monitoring database connection with a given default monitored
      * resource strategy.
      *
-     * @param monitoringDatabaseConnection a monitoring database connection
+     * @param monitoringDatabaseConnection a monitoring database connection (the
+     * auto-commit on this connection will be temporarily turned off during the
+     * monitoring)
      * @param applicationId an application ID
      * @param monitoredResourcesDefaultStrategy a default monitored resource
      * strategy used by the agent
@@ -66,7 +70,9 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
      */
     public MonitoringAgentForDatabase(Connection monitoringDatabaseConnection, String applicationId, MonitoredResourcesStrategyInterface monitoredResourcesDefaultStrategy) throws SQLException {
         super(applicationId, monitoredResourcesDefaultStrategy);
-        createPreparedStatements(monitoringDatabaseConnection);
+        this.monitoringDatabaseConnection = monitoringDatabaseConnection;
+        this.previousAutoCommit = monitoringDatabaseConnection.getAutoCommit();
+        setConnectionAndCreatePreparedStatements(monitoringDatabaseConnection);
     }
 
     /**
@@ -75,17 +81,24 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
      * <code>MonitoredResourcesDefaultStrategy</code> default monitored resource
      * strategy.
      *
-     * @param monitoringDatabaseConnection a monitoring database connection
+     * @param monitoringDatabaseConnection a monitoring database connection (the
+     * auto-commit on this connection will be temporarily turned off during the
+     * monitoring)
      * @param applicationId an application ID
      * @throws java.sql.SQLException if the monitoring database connection
      * cannot be used
      */
     public MonitoringAgentForDatabase(Connection monitoringDatabaseConnection, String applicationId) throws SQLException {
         super(applicationId);
-        createPreparedStatements(monitoringDatabaseConnection);
+        this.monitoringDatabaseConnection = monitoringDatabaseConnection;
+        this.previousAutoCommit = monitoringDatabaseConnection.getAutoCommit();
+        setConnectionAndCreatePreparedStatements(monitoringDatabaseConnection);
     }
 
-    private void createPreparedStatements(Connection monitoringDatabaseConnection) throws SQLException {
+    private void setConnectionAndCreatePreparedStatements(Connection monitoringDatabaseConnection) throws SQLException {
+        // trun off the auto-commit
+        this.monitoringDatabaseConnection.setAutoCommit(false);
+        // prepare statements for later
         this.preparedStatementRecord = monitoringDatabaseConnection.prepareStatement(SQL_INSERT_RECORD, Statement.RETURN_GENERATED_KEYS);
         this.preparedStatementNumericValue = monitoringDatabaseConnection.prepareStatement(SQL_INSERT_NUMERIC_VALUE);
         this.preparedStatementTextValue = monitoringDatabaseConnection.prepareStatement(SQL_INSERT_TEXT_VALUE);
@@ -99,6 +112,9 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
      */
     @Override
     public void close() throws SQLException {
+        // set the auto-commit to the previous value
+        this.monitoringDatabaseConnection.setAutoCommit(this.previousAutoCommit);
+        // free prepared statement resources
         this.preparedStatementRecord.close();
         this.preparedStatementNumericValue.close();
         this.preparedStatementTextValue.close();
@@ -119,7 +135,7 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
     public String sendMetric(String metricType, String[] metricNames, String[] metricValues, double timestampSec, String hostname) {
         try {
             Integer recId = null;
-            // generate the metrics data header
+            // generate the metrics data header and send them into the database
             preparedStatementRecord.setTimestamp(1, new Timestamp((long) (timestampSec * 1000)));
             preparedStatementRecord.setString(2, metricType);
             preparedStatementRecord.setString(3, hostname);
@@ -129,19 +145,18 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
                     recId = generatedKeys.getInt(1);
                 }
             }
-            // generate the metrics data key-value pairs
+            // generate the metrics data key-value pairs and send them into the database
             for (int i = 0; i < metricNames.length && i < metricValues.length; i++) {
                 if ((metricNames[i] != null) && (metricValues[i] != null)) {
                     try {
-                        // print the value as a double number value if possible
+                        // use the value as a double number value if possible
                         double doubleValue = Double.parseDouble(metricValues[i]);
                         preparedStatementNumericValue.setInt(1, recId);
                         preparedStatementNumericValue.setString(2, metricNames[i]);
                         preparedStatementNumericValue.setDouble(3, doubleValue);
                         preparedStatementNumericValue.executeUpdate();
-                    }
-                    catch (NumberFormatException e) {
-                        // print the value as a string value otherwise
+                    } catch (NumberFormatException e) {
+                        // use the value as a string value otherwise
                         preparedStatementTextValue.setInt(1, recId);
                         preparedStatementTextValue.setString(2, metricNames[i]);
                         preparedStatementTextValue.setString(3, metricValues[i]);
@@ -149,8 +164,9 @@ public class MonitoringAgentForDatabase extends MonitoringAgentAbstract implemen
                     }
                 }
             }
-        }
-        catch (SQLException ex) {
+            // commit the sent data in the database
+            this.monitoringDatabaseConnection.commit();
+        } catch (SQLException ex) {
             return ex.getMessage();
         }
         return null;
